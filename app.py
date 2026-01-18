@@ -18,6 +18,7 @@ df = pd.read_csv(url)
 # =====================
 # Standarization Data
 # =====================
+df['date'] = pd.to_datetime(df['date'])
 df_month = df[['month_int', 'month_str']].drop_duplicates().sort_values(['month_int'])
 
 # =====================
