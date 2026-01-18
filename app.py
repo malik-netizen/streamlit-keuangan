@@ -18,11 +18,6 @@ df = pd.read_csv(url)
 # =====================
 # Standarization Data
 # =====================
-df['expense'] = df['expense'].fillna('0')
-df['expense'] = df['expense'].apply(lambda x: int(x.replace(',', '').replace('.', ''))).astype(int)
-df['date'] = pd.to_datetime(df['date'])
-df['month_int'] = df['date'].dt.to_period("M").astype(str)
-df['month_str'] = df['date'].dt.strftime('%b-%Y')
 df_month = df[['month_int', 'month_str']].drop_duplicates().sort_values(['month_int'])
 
 # =====================
