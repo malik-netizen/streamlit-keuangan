@@ -35,7 +35,7 @@ months = st.sidebar.multiselect(
     default=df_month.iloc[-1]['month_str']
 )
 
-df = df[df['month_str'].isin(months)]
+df1 = df[df['month_str'].isin(months)]
 
 # =====================
 # KPI
@@ -44,7 +44,7 @@ df = df[df['month_str'].isin(months)]
 cols = st.columns(4)
 
 income = 8700000 + 15000000
-expense = sum(df["expense"])
+expense = sum(df1["expense"])
 saving = income - expense
 saving_rate = (saving / income * 100) if income else 0
 expected_saving_rate = 60
@@ -81,3 +81,53 @@ c6.metric(sign1, sign)
 # )
 # st.plotly_chart(fig_cash, use_container_width=True)
 
+# =====================
+# Prepare Daily Expense Data
+# =====================
+
+daily_expense = (
+    df
+    .groupby(df['date'].dt.date)['expense']
+    .sum()
+    .reset_index()
+    .rename(columns={'expense': 'Total Pengeluaran'})
+)
+
+daily_expense['date'] = pd.to_datetime(daily_expense['date'])
+
+st.header("📉 Monitoring Pengeluaran Harian")
+
+start_date, end_date = st.date_input(
+    "Pilih rentang tanggal",
+    value=[daily_expense['date'].min(), daily_expense['date'].max()]
+)
+
+filtered = daily_expense[
+    (daily_expense['date'] >= pd.to_datetime(start_date)) &
+    (daily_expense['date'] <= pd.to_datetime(end_date))
+]
+
+fig_filtered = px.line(
+    filtered,
+    x="date",
+    y="Total Pengeluaran",
+    markers=True,
+    title="Pengeluaran Harian (Filtered)"
+)
+
+st.plotly_chart(fig_filtered, use_container_width=True)
+
+max_day = filtered.loc[
+    filtered['Total Pengeluaran'].idxmax()
+]
+
+st.warning(
+    f"💸 Pengeluaran tertinggi terjadi pada "
+    f"{max_day['date'].strftime('%d %B %Y')} "
+    f"sebesar Rp {max_day['Total Pengeluaran']:,.0f}"
+)
+
+df_top5 = df[df['date'] == max_day['date']][['detail', 'expense', 'payment_tools']].sort_values(['expense'], ascending=False).reset_index(drop=True)
+df_top5['expense'] = df_top5['expense'].apply(lambda x: f"Rp {x:,.0f}")
+df_top5.columns = ['Item', 'Nominal', 'Payment']
+st.dataframe(df_top5)
