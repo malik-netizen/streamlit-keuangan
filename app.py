@@ -78,6 +78,15 @@ c6.metric(sign1, sign)
 # st.plotly_chart(fig_cash, use_container_width=True)
 
 # =====================
+# Pie Chart
+# =====================
+
+st.header("📉 Pengeluaran Bulanan")
+# path = st.multiselect('Pilih Kategori')
+fig = px.sunburst(data_frame=df1, path=('category', 'payment_tools'), values='expense')
+st.plotly_chart(fig)
+
+# =====================
 # Prepare Daily Expense Data
 # =====================
 
